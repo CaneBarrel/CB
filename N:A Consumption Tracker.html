@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NA Consumption Tracker</title>
+<style>
+:root{
+  --bg:#081517;--card:#102327;--card2:#143036;--line:#1e444c;
+  --accent:#1fa08e;--accent2:#4cc9b5;--accent-soft:#155f58;
+  --text:#e7f2f0;--muted:#8fb0ab;--ok:#3fae6a;--bad:#e05a5a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding-bottom:130px;}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0b1b1e,#0b1b1ef2);border-bottom:1px solid var(--line);padding:14px 16px 12px;backdrop-filter:blur(6px);}
+h1{margin:0;font-size:18px;letter-spacing:.3px;}
+h1 span{color:var(--accent2);}
+.sub{color:var(--muted);font-size:12px;margin-top:3px;}
+main{max-width:720px;margin:0 auto;padding:10px 12px;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;}
+.panel h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fgrid .full{grid-column:1/-1;}
+label.fl{display:block;font-size:11px;color:var(--muted);margin:0 0 3px 2px;text-transform:uppercase;letter-spacing:.5px;}
+input.f,textarea.f{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:15px;font-family:inherit;}
+textarea.f{resize:vertical;min-height:56px;}
+.coffee{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;cursor:pointer;user-select:none;}
+.coffee.on{border-color:var(--accent);background:var(--card2);}
+.cbox{flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;color:#08211f;background:transparent;}
+.coffee.on .cbox{background:var(--accent);border-color:var(--accent);color:#fff;}
+.ctext{flex:1;}
+.ctitle{font-size:15px;font-weight:700;}
+.csub{font-size:12px;color:var(--muted);margin-top:2px;}
+.cat{margin-top:18px;}
+.cat h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin:0 0 8px 4px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;transition:border-color .15s,background .15s;}
+.item.on{border-color:var(--accent);background:var(--card2);}
+.itop{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.iname{font-size:15px;font-weight:700;}
+.consumed{font-size:13px;font-weight:700;color:var(--muted);}
+.item.on .consumed{color:var(--accent2);}
+.consumed.neg{color:var(--bad)!important;}
+.steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.step{text-align:center;}
+.slbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;}
+.sctl{display:flex;align-items:center;gap:4px;justify-content:center;}
+.stepbtn{width:32px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--accent2);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;}
+.stepbtn:active{background:var(--accent-soft);color:#fff;}
+.qty{width:100%;min-width:34px;background:var(--bg);border:1px solid var(--line);color:var(--text);text-align:center;padding:8px 2px;border-radius:9px;font-size:15px;font-weight:600;}
+.subrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:4px 6px 0;font-weight:600;}
+.subrow b{color:var(--text);}
+.totals{position:fixed;bottom:66px;left:0;right:0;z-index:19;pointer-events:none;}
+.totals .inner{max-width:720px;margin:0 auto;padding:0 12px;}
+.totalbar{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;box-shadow:0 4px 16px #0008;}
+.totalbar .amt{font-size:17px;color:#fff;}
+footer{position:fixed;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(0deg,#081517,#081517f2);border-top:1px solid var(--line);padding:10px 16px 14px;}
+.finner{max-width:720px;margin:0 auto;display:flex;gap:10px;}
+button.act{border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.copy{flex:1;background:var(--accent);color:#fff;}
+.copy:active{background:var(--accent2);}
+.clear{flex:0 0 auto;background:var(--card);color:var(--muted);border:1px solid var(--line);padding:14px 18px;}
+.toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 20px;border-radius:30px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 6px 20px #0008;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+dialog{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:0;width:92%;max-width:560px;}
+dialog::backdrop{background:#000a;}
+.dlgh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.dlgh b{font-size:15px;}
+#outView{max-height:50vh;overflow:auto;background:#fff;margin:0;padding:14px;}
+.dlgf{padding:12px 16px;display:flex;gap:8px;border-top:1px solid var(--line);}
+.dlgf .act{flex:1;padding:13px 8px;font-size:14px;}
+.x{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>
+  <h1>NA <span>Consumption</span> Tracker</h1>
+  <div class="sub">Non-alcoholic beverages, snacks &amp; coffee. Consumed = Started + Added − Leftover.</div>
+</header>
+<main>
+  <div class="panel">
+    <h3>Event Details</h3>
+    <div class="fgrid">
+      <div class="full"><label class="fl" for="fEvent">Event Name</label><input class="f" id="fEvent" autocomplete="off"></div>
+      <div><label class="fl" for="fDate">Date</label><input class="f" id="fDate" type="date"></div>
+      <div><label class="fl" for="fBeo">BEO Number</label><input class="f" id="fBeo" inputmode="numeric" autocomplete="off"></div>
+      <div class="full"><label class="fl" for="fServer">Server Name</label><input class="f" id="fServer" autocomplete="off"></div>
+      <div class="full"><label class="fl" for="fNotes">Notes</label><textarea class="f" id="fNotes" placeholder="Optional comments…"></textarea></div>
+    </div>
+  </div>
+  <div class="coffee" id="coffeeRow">
+    <div class="cbox">✓</div>
+    <div class="ctext">
+      <div class="ctitle">Extra Coffee Service</div>
+      <div class="csub">Tap to mark if extra coffee service was provided — included in the summary.</div>
+    </div>
+  </div>
+  <div id="list"></div>
+</main>
+<div class="totals"><div class="inner">
+  <div class="totalbar"><span>Total Consumed</span><span class="amt" id="tAmt">0</span></div>
+</div></div>
+<footer><div class="finner">
+  <button class="act clear" id="resetBtn">Reset</button>
+  <button class="act copy" id="copyBtn">Copy Results</button>
+</div></footer>
+<div class="toast" id="toast">Copied ✓</div>
+<dialog id="dlg">
+  <div class="dlgh"><b>Consumption Summary</b><button class="x" id="dlgX">&times;</button></div>
+  <div id="outView"></div>
+  <div class="dlgf">
+    <button class="act clear" id="dlgClose">Close</button>
+    <button class="act clear" id="dlgCopyText">Copy for Text</button>
+    <button class="act copy" id="dlgCopyEmail">Copy for Email</button>
+  </div>
+</dialog>
+<script>
+const SECTIONS=[
+  {name:"Beverages",items:["Water","Soda","Red Bull","Gatorade","Pure Green Juice"]},
+  {name:"Snacks",items:["Chips","Granola Bars","Candy Bars","Popcorn","Fruit","Protein Bars"]}
+];
+const COLS=[["start","Started"],["added","Added"],["left","Leftover"]];
+const KEY="naConsumptionTracker_v1";
+const $=id=>document.getElementById(id);
+const list=$("list");
+const cells={}; // "Section|Item" -> {start,added,left,el,consumedEl}
+
+SECTIONS.forEach(sec=>{
+  const wrap=document.createElement("div");wrap.className="cat";
+  wrap.innerHTML="<h2>"+sec.name+"</h2>";
+  sec.items.forEach(item=>{
+    const card=document.createElement("div");card.className="item";
+    let steps='<div class="steps">';
+    COLS.forEach(([k,lbl])=>{
+      steps+='<div class="step"><div class="slbl">'+lbl+'</div><div class="sctl">'+
+        '<button class="stepbtn" data-k="'+k+'" data-d="-1">−</button>'+
+        '<input class="qty" data-k="'+k+'" type="number" min="0" inputmode="numeric" value="0">'+
+        '<button class="stepbtn" data-k="'+k+'" data-d="1">+</button>'+
+      '</div></div>';
+    });
+    steps+='</div>';
+    card.innerHTML='<div class="itop"><div class="iname">'+item+'</div><div class="consumed">Consumed: 0</div></div>'+steps;
+    const rec={el:card,consumedEl:card.querySelector(".consumed"),inputs:{}};
+    COLS.forEach(([k])=>{rec.inputs[k]=card.querySelector('input[data-k="'+k+'"]');});
+    cells[sec.name+"|"+item]=rec;
+    card.querySelectorAll(".stepbtn").forEach(b=>b.addEventListener("click",()=>{
+      const inp=rec.inputs[b.dataset.k];
+      inp.value=Math.max(0,(parseInt(inp.value)||0)+parseInt(b.dataset.d));
+      refresh();save();
+    }));
+    card.querySelectorAll("input.qty").forEach(i=>i.addEventListener("input",()=>{refresh();save();}));
+    wrap.appendChild(card);
+  });
+  const sub=document.createElement("div");sub.className="subrow";
+  sub.innerHTML='<span>'+sec.name+' Subtotal (consumed)</span><b data-sub="'+sec.name+'">0</b>';
+  wrap.appendChild(sub);
+  list.appendChild(wrap);
+});
+
+const val=inp=>Math.max(0,parseInt(inp.value)||0);
+const consumedOf=rec=>val(rec.inputs.start)+val(rec.inputs.added)-val(rec.inputs.left);
+
+function refresh(){
+  let grand=0;
+  SECTIONS.forEach(sec=>{
+    let q=0;
+    sec.items.forEach(item=>{
+      const rec=cells[sec.name+"|"+item];
+      const c=consumedOf(rec);
+      rec.consumedEl.textContent="Consumed: "+c;
+      rec.consumedEl.classList.toggle("neg",c<0);
+      rec.el.classList.toggle("on",c!==0);
+      if(c>0)q+=c;
+    });
+    grand+=q;
+    document.querySelector('[data-sub="'+sec.name+'"]').textContent=q;
+  });
+  $("tAmt").textContent=grand;
+}
+
+const coffeeRow=$("coffeeRow");
+let coffee=false;
+coffeeRow.addEventListener("click",()=>{coffee=!coffee;coffeeRow.classList.toggle("on",coffee);save();});
+
+const FIELDS=["fEvent","fDate","fBeo","fServer","fNotes"];
+function save(){
+  const data={fields:{},cells:{},coffee};
+  FIELDS.forEach(f=>data.fields[f]=$(f).value);
+  Object.keys(cells).forEach(k=>{
+    const r=cells[k];
+    const v=[val(r.inputs.start),val(r.inputs.added),val(r.inputs.left)];
+    if(v.some(x=>x>0))data.cells[k]=v;
+  });
+  try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}
+}
+function load(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+  if(d){
+    FIELDS.forEach(f=>{if(d.fields&&d.fields[f]!==undefined)$(f).value=d.fields[f];});
+    Object.keys(d.cells||{}).forEach(k=>{
+      if(cells[k]){
+        cells[k].inputs.start.value=d.cells[k][0];
+        cells[k].inputs.added.value=d.cells[k][1];
+        cells[k].inputs.left.value=d.cells[k][2];
+      }
+    });
+    coffee=!!d.coffee;coffeeRow.classList.toggle("on",coffee);
+  }
+  if(!$("fDate").value){$("fDate").value=new Date().toISOString().slice(0,10);}
+  refresh();
+}
+FIELDS.forEach(f=>$(f).addEventListener("input",()=>{refresh();save();}));
+
+function fmtDate(){
+  const v=$("fDate").value;
+  if(!v)return new Date().toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
+  const[y,m,dd]=v.split("-").map(Number);
+  return new Date(y,m-1,dd).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
+}
+const stamp=()=>new Date().toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function collect(){
+  const out={sections:[],grand:0};
+  SECTIONS.forEach(sec=>{
+    const rows=[];let q=0;
+    sec.items.forEach(item=>{
+      const rec=cells[sec.name+"|"+item];
+      const c=consumedOf(rec);
+      if(c>0){
+        rows.push({item,start:val(rec.inputs.start),added:val(rec.inputs.added),left:val(rec.inputs.left),consumed:c});
+        q+=c;
+      }
+    });
+    if(rows.length){out.sections.push({name:sec.name,rows,qty:q});out.grand+=q;}
+  });
+  return out;
+}
+
+function buildPlain(c){
+  const L=[];
+  L.push("NA CONSUMPTION — BEVERAGES, SNACKS & COFFEE");
+  L.push("Event: "+($("fEvent").value||"—"));
+  L.push("Date: "+fmtDate());
+  L.push("BEO #: "+($("fBeo").value||"—"));
+  L.push("Server: "+($("fServer").value||"—"));
+  L.push("Sent: "+stamp());
+  L.push("");
+  c.sections.forEach(s=>{
+    L.push("— "+s.name.toUpperCase()+" —");
+    s.rows.forEach(r=>L.push(r.consumed+"  "+r.item+"  (start "+r.start+" + added "+r.added+" − left "+r.left+")"));
+    L.push("Subtotal: "+s.qty);
+    L.push("");
+  });
+  if(coffee)L.push("EXTRA COFFEE SERVICE: YES");
+  L.push("GRAND TOTAL CONSUMED: "+c.grand);
+  const notes=$("fNotes").value.trim();
+  if(notes){L.push("");L.push("Notes: "+notes);}
+  return L.join("\n");
+}
+
+function buildHTML(c){
+  let h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111;">';
+  h+='<p style="margin:0 0 2px;font-size:16px;font-weight:bold;">NA Consumption — Beverages, Snacks &amp; Coffee</p>';
+  h+='<p style="margin:0 0 10px;font-size:12px;color:#555;">'+esc($("fEvent").value||"—")+' &nbsp;·&nbsp; '+esc(fmtDate())+' &nbsp;·&nbsp; BEO '+esc($("fBeo").value||"—")+'<br>Server '+esc($("fServer").value||"—")+' &nbsp;·&nbsp; Sent '+esc(stamp())+'</p>';
+  h+='<table cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:13px;">';
+  c.sections.forEach(s=>{
+    h+='<tr><td colspan="5" style="background:#1fa08e;color:#fff;font-weight:bold;padding:6px 8px;border:1px solid #17796c;">'+esc(s.name)+'</td></tr>';
+    h+='<tr style="background:#f0f0f0;"><td style="border:1px solid #ccc;font-weight:bold;">Item</td><td style="border:1px solid #ccc;font-weight:bold;">Started</td><td style="border:1px solid #ccc;font-weight:bold;">Added</td><td style="border:1px solid #ccc;font-weight:bold;">Leftover</td><td style="border:1px solid #ccc;font-weight:bold;">Consumed</td></tr>';
+    s.rows.forEach(r=>{
+      h+='<tr><td style="border:1px solid #ccc;">'+esc(r.item)+'</td><td style="border:1px solid #ccc;text-align:center;">'+r.start+'</td><td style="border:1px solid #ccc;text-align:center;">'+r.added+'</td><td style="border:1px solid #ccc;text-align:center;">'+r.left+'</td><td style="border:1px solid #ccc;text-align:center;font-weight:bold;">'+r.consumed+'</td></tr>';
+    });
+    h+='<tr><td colspan="4" style="border:1px solid #ccc;font-weight:bold;background:#fafafa;">'+esc(s.name)+' Subtotal</td><td style="border:1px solid #ccc;text-align:center;font-weight:bold;background:#fafafa;">'+s.qty+'</td></tr>';
+  });
+  if(coffee)h+='<tr><td colspan="5" style="border:1px solid #999;font-weight:bold;background:#e2f2ef;">EXTRA COFFEE SERVICE: YES</td></tr>';
+  h+='<tr><td colspan="4" style="border:1px solid #999;font-weight:bold;background:#e2f2ef;">GRAND TOTAL CONSUMED</td><td style="border:1px solid #999;text-align:center;font-weight:bold;background:#e2f2ef;">'+c.grand+'</td></tr>';
+  h+='</table>';
+  const notes=$("fNotes").value.trim();
+  if(notes)h+='<p style="font-size:13px;"><b>Notes:</b> '+esc(notes)+'</p>';
+  h+='</div>';
+  return h;
+}
+
+function showToast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+async function copyBoth(html,plain){
+  try{
+    const item=new ClipboardItem({
+      "text/html":new Blob([html],{type:"text/html"}),
+      "text/plain":new Blob([plain],{type:"text/plain"})
+    });
+    await navigator.clipboard.write([item]);showToast("Copied ✓");
+  }catch(e){
+    try{await navigator.clipboard.writeText(plain);showToast("Copied ✓");}
+    catch(e2){showToast("Copy failed — long-press the preview to copy");}
+  }
+}
+let lastHTML="",lastPlain="";
+$("copyBtn").addEventListener("click",()=>{
+  const c=collect();
+  if(!c.sections.length&&!coffee){alert("Nothing counted yet. Add quantities first.");return;}
+  lastHTML=buildHTML(c);lastPlain=buildPlain(c);
+  $("outView").innerHTML=lastHTML;
+  copyBoth(lastHTML,lastPlain);
+  $("dlg").showModal();
+});
+$("dlgCopyEmail").addEventListener("click",()=>copyBoth(lastHTML,lastPlain));
+$("dlgCopyText").addEventListener("click",()=>{
+  navigator.clipboard.writeText(lastPlain).then(()=>showToast("Text copied ✓")).catch(()=>showToast("Copy failed"));
+});
+$("dlgClose").addEventListener("click",()=>$("dlg").close());
+$("dlgX").addEventListener("click",()=>$("dlg").close());
+$("resetBtn").addEventListener("click",()=>{
+  if(!confirm("Reset all counts and event details?"))return;
+  Object.values(cells).forEach(r=>{Object.values(r.inputs).forEach(i=>i.value=0);});
+  FIELDS.forEach(f=>$(f).value="");
+  $("fDate").value=new Date().toISOString().slice(0,10);
+  coffee=false;coffeeRow.classList.remove("on");
+  try{localStorage.removeItem(KEY);}catch(e){}
+  refresh();
+});
+load();
+</script>
+</body>
+</html>
